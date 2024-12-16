@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ZkVoteRelayer</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ZkVoteRelayer.Domain\ZkVoteRelayer.Domain.csproj" />
+    <ProjectReference Include="..\ZkVoteRelayer.Application.Contracts\ZkVoteRelayer.Application.Contracts.csproj" />
+    <ProjectReference Include="..\ZkVoteRelayer.Application.Grains\ZkVoteRelayer.Application.Grains.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.Account.Application" Version="8.2.0" />
+    <PackageReference Include="Volo.Abp.Identity.Application" Version="8.2.0" />
+    <PackageReference Include="Volo.Abp.PermissionManagement.Application" Version="8.2.0" />
+    <PackageReference Include="AElf.OpenTelemetry" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>
