@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AElf.Client.Dto;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Volo.Abp;
@@ -29,7 +30,7 @@ public class RelayerController : ZkVoteRelayerController
     }
 
     [HttpPost("relayTx")]
-    public async Task<SubmittedTxDto> RelayTransaction(TxDto tx)
+    public async Task<AElf.Client.Dto.TransactionResultDto> RelayTransaction(TxDto tx)
     {
         return await _txRelayAppService.SubmitTransactionAsync(tx);
     }

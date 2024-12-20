@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AElf.Client.Dto;
+using AElf.Types;
 using Volo.Abp.Application.Services;
 
 namespace ZkVoteRelayer.TxRelay;
@@ -7,5 +9,5 @@ namespace ZkVoteRelayer.TxRelay;
 public interface ITxRelayAppService : IApplicationService
 {
     Task<List<SupportedCallDto>> GetSupportedCallsAsync();
-    Task<SubmittedTxDto> SubmitTransactionAsync(TxDto tx);
+    Task<TransactionResultDto> SubmitTransactionAsync(TxDto tx);
 }

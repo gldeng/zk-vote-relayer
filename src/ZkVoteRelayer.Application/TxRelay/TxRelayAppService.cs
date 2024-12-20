@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using AElf.Client.Dto;
 using AElf.OpenTelemetry;
 using AElf.OpenTelemetry.ExecutionTime;
 using AElf.Types;
@@ -12,6 +13,7 @@ using Orleans;
 using Volo.Abp.Application.Services;
 using Volo.Abp.ObjectMapping;
 using ZkVoteRelayer.Domain.Grains.TxRelay;
+using TransactionResultDto = ZkVoteRelayer.Domain.Grains.TxRelay.TransactionResultDto;
 
 namespace ZkVoteRelayer.TxRelay;
 
@@ -55,23 +57,35 @@ public class TxRelayAppService : ApplicationService, ITxRelayAppService
         return _supportedCalls;
     }
 
-    public async Task<SubmittedTxDto> SubmitTransactionAsync(TxDto tx)
+    public async Task<AElf.Client.Dto.TransactionResultDto> SubmitTransactionAsync(TxDto tx)
     {
-        var calls = await GetSupportedCallsAsync();
-        if (!calls.Any(
-                call => tx.ChainName == call.ChainName &&
-                        tx.ContractAddress == call.ContractAddress
-            )) throw new Exception("the target call is not supported");
-
-        var jobId = tx.ToJobId();
-
-        var txRelayJob = _clusterClient.GetGrain<IVoteRelayJob>(jobId);
-        var grainDto = _objectMapper.Map<TxDto, VoteRelayDto>(tx);
-        var result = await txRelayJob.SendTxAsync(grainDto);
-        return new SubmittedTxDto
+        try
         {
-            JobId = jobId,
-            TxId = result
-        };
+            var calls = await GetSupportedCallsAsync();
+            if (!calls.Any(
+                    call => tx.ChainName == call.ChainName &&
+                            tx.ContractAddress == call.ContractAddress
+                )) throw new Exception("the target call is not supported");
+
+            var jobId = tx.ToJobId();
+
+            var txRelayJob = _clusterClient.GetGrain<IVoteRelayJob>(jobId);
+
+            var result = await txRelayJob.GetTransactionResultAsync();
+            if (result != null)
+            {
+                throw new Exception($"vote already sent in transaction id {result.TransactionId}");
+            }
+
+            var grainDto = _objectMapper.Map<TxDto, VoteRelayDto>(tx);
+            result = await txRelayJob.SendTxAsync(grainDto);
+            var resultDto = _objectMapper.Map<TransactionResultDto, AElf.Client.Dto.TransactionResultDto>(result);
+
+            return resultDto;
+        }
+        catch (Exception ex)
+        {
+            throw new AggregateException(ex);
+        }
     }
 }

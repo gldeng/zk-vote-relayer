@@ -72,9 +72,10 @@ public class MethodStubFactory : IMethodStubFactory
             if (sendResult == null) return new ExecutionResult<TOutput> { Transaction = transaction };
 
             // TODO: Must wait if transaction status is pending
-            var (transactionResult, returnValue) =
+            var result =
                 await _client.WaitForTransactionCompletionAsync(Hash.LoadFromHex(sendResult.TransactionId));
 
+            var (transactionResult, returnValue) = result.IntoProtobuf();
             var status = transactionResult.Status;
             switch (status)
             {

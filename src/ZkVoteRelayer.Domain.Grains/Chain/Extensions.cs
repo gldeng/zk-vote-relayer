@@ -9,7 +9,7 @@ using Google.Protobuf;
 
 public static class Extensions
 {
-    public static async Task<(TransactionResult, ByteString)> WaitForTransactionCompletionAsync(
+    public static async Task<TransactionResultDto> WaitForTransactionCompletionAsync(
         this AElfClient client,
         Hash transactionId)
     {
@@ -18,9 +18,8 @@ public static class Extensions
 
         var result = await RetryWithExponentialBackoff(maxRetries, initialDelayMs, async () =>
         {
-            var result =
-                (await client.GetTransactionResultAsync(transactionId.ToHex())).IntoProtobuf();
-            var status = result.Item1.Status;
+            var result = await client.GetTransactionResultAsync(transactionId.ToHex());
+            var status = ParseStatus(result.Status);
 
             switch (status)
             {
@@ -39,7 +38,7 @@ public static class Extensions
         });
 
         // ReSharper disable once ComplexConditionExpression
-        if (result.Item1 == null || result.Item1.Status == TransactionResultStatus.NotExisted)
+        if (ParseStatus(result.Status) == TransactionResultStatus.NotExisted)
         {
             throw new Exception($"Transaction does not exist after {maxRetries} retries");
         }

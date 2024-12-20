@@ -11,7 +11,8 @@ public class TxDto
 
     public override string ToString()
     {
-        return $"{ChainName}/{ContractAddress}";
+        return
+            $"{ChainName}/{ContractAddress}/{VoteDetails.VotingItemId}/{VoteDetails.NullifierHash}/{VoteDetails.VoteOption}/{VoteDetails.Proof.PiA[0]}";
     }
 
     public string ToJobId()

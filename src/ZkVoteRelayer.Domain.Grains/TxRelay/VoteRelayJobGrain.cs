@@ -5,17 +5,15 @@ using Google.Protobuf;
 using Orleans.Runtime;
 using TomorrowDAO.Contracts.Vote;
 using ZkVoteRelayer.Domain.Grains.Chain;
-using ZkVoteRelayer.Domain.Grains.KeyStore;
-using ZkVoteRelayer.TxRelay;
 
 namespace ZkVoteRelayer.Domain.Grains.TxRelay;
 
 [GenerateSerializer]
 public class TxRelayJobState
 {
-    public Transaction SignedTransaction { get; set; }
+    public ByteString TransactionBytes { get; set; }
     public string TransactionId { get; set; }
-    public TransactionResult TransactionResult { get; set; }
+    public TransactionResultDto TransactionResult { get; set; }
 }
 
 public class VoteRelayJobGrain : Grain<TxRelayJobState>, IVoteRelayJob
@@ -23,24 +21,21 @@ public class VoteRelayJobGrain : Grain<TxRelayJobState>, IVoteRelayJob
     private readonly IPersistentState<TxRelayJobState> _state;
     private readonly IAElfClientFactory _clientFactory;
     private readonly IContractStubFactory _contractStubFactory;
-    private readonly IKeyStore _keyStore;
 
     public VoteRelayJobGrain(
         [PersistentState("TxRelayJobState", "Default")]
         IPersistentState<TxRelayJobState> state,
         IAElfClientFactory clientFactory,
-        IContractStubFactory contractStubFactory,
-        IKeyStore keyStore
+        IContractStubFactory contractStubFactory
     )
     {
         _state = state;
         _clientFactory = clientFactory;
         _contractStubFactory = contractStubFactory;
-        _keyStore = keyStore;
     }
 
 
-    public async Task<string> SendTxAsync(VoteRelayDto request)
+    public async Task<TransactionResultDto> SendTxAsync(VoteRelayDto request)
     {
         try
         {
@@ -86,7 +81,7 @@ public class VoteRelayJobGrain : Grain<TxRelayJobState>, IVoteRelayJob
             };
 
             var tx = contractInstance.Vote.GetTransaction(input);
-            _state.State.SignedTransaction = tx;
+            _state.State.TransactionBytes = tx.ToByteString();
 
             var client = _clientFactory.GetClient(request.ChainName);
             var sendResult = await client.SendTransactionAsync(new SendTransactionInput()
@@ -95,15 +90,21 @@ public class VoteRelayJobGrain : Grain<TxRelayJobState>, IVoteRelayJob
             });
             _state.State.TransactionId = sendResult.TransactionId;
 
-            var (transactionResult, returnValue) =
-                await client.WaitForTransactionCompletionAsync(Hash.LoadFromHex(sendResult.TransactionId));
+            var transactionResult = TransactionResultDto.FromClientDto(
+                await client.WaitForTransactionCompletionAsync(Hash.LoadFromHex(sendResult.TransactionId))
+            );
 
             _state.State.TransactionResult = transactionResult;
-            return sendResult.TransactionId;
+            return transactionResult;
         }
         finally
         {
             await _state.WriteStateAsync();
         }
+    }
+
+    public async Task<TransactionResultDto> GetTransactionResultAsync()
+    {
+        return await Task.FromResult(_state.State.TransactionResult);
     }
 }
