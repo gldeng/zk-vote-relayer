@@ -59,33 +59,26 @@ public class TxRelayAppService : ApplicationService, ITxRelayAppService
 
     public async Task<AElf.Client.Dto.TransactionResultDto> SubmitTransactionAsync(TxDto tx)
     {
-        try
+        var calls = await GetSupportedCallsAsync();
+        if (!calls.Any(
+                call => tx.ChainName == call.ChainName &&
+                        tx.ContractAddress == call.ContractAddress
+            )) throw new Exception("the target call is not supported");
+
+        var jobId = tx.ToJobId();
+
+        var txRelayJob = _clusterClient.GetGrain<IVoteRelayJob>(jobId);
+
+        var result = await txRelayJob.GetTransactionResultAsync();
+        if (result != null)
         {
-            var calls = await GetSupportedCallsAsync();
-            if (!calls.Any(
-                    call => tx.ChainName == call.ChainName &&
-                            tx.ContractAddress == call.ContractAddress
-                )) throw new Exception("the target call is not supported");
-
-            var jobId = tx.ToJobId();
-
-            var txRelayJob = _clusterClient.GetGrain<IVoteRelayJob>(jobId);
-
-            var result = await txRelayJob.GetTransactionResultAsync();
-            if (result != null)
-            {
-                throw new Exception($"vote already sent in transaction id {result.TransactionId}");
-            }
-
-            var grainDto = _objectMapper.Map<TxDto, VoteRelayDto>(tx);
-            result = await txRelayJob.SendTxAsync(grainDto);
-            var resultDto = _objectMapper.Map<TransactionResultDto, AElf.Client.Dto.TransactionResultDto>(result);
-
-            return resultDto;
+            throw new Exception($"vote already sent in transaction id {result.TransactionId}");
         }
-        catch (Exception ex)
-        {
-            throw new AggregateException(ex);
-        }
+
+        var grainDto = _objectMapper.Map<TxDto, VoteRelayDto>(tx);
+        result = await txRelayJob.SendTxAsync(grainDto);
+        var resultDto = _objectMapper.Map<TransactionResultDto, AElf.Client.Dto.TransactionResultDto>(result);
+
+        return resultDto;
     }
 }
