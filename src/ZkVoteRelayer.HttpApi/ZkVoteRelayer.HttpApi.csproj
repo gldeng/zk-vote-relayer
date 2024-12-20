@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ZkVoteRelayer.Application.Contracts\ZkVoteRelayer.Application.Contracts.csproj" />
+    <ProjectReference Include="..\ZkVoteRelayer.Domain.Grains\ZkVoteRelayer.Domain.Grains.csproj" />
   </ItemGroup>
 
   <ItemGroup>

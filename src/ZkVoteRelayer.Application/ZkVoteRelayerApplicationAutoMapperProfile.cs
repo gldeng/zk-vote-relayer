@@ -1,5 +1,9 @@
 ﻿using AutoMapper;
 using ZkVoteRelayer.Authors;
+using ZkVoteRelayer.Domain.Grains.TxRelay;
+using ZkVoteRelayer.TxRelay;
+using ProofDto = ZkVoteRelayer.TxRelay.ProofDto;
+using VoteDetailsDto = ZkVoteRelayer.TxRelay.VoteDetailsDto;
 
 namespace ZkVoteRelayer;
 
@@ -13,6 +17,10 @@ public class ZkVoteRelayerApplicationAutoMapperProfile : Profile
         
         //Example related, can be removed
         CreateMap<Author, AuthorDto>();
+        CreateMap<SupportedCall, SupportedCallDto>();
+        CreateMap<TxDto, VoteRelayDto>();
+        CreateMap<VoteDetailsDto, Domain.Grains.TxRelay.VoteDetailsDto>();
+        CreateMap<ProofDto, Domain.Grains.TxRelay.ProofDto>();
 
     }
 }

@@ -7,12 +7,25 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
-        <PackageReference Include="Microsoft.Orleans.Sdk" Version="7.2.6" />
-        <PackageReference Include="AElf.OpenTelemetry" Version="1.0.0" />
+        <PackageReference Include="AElf.Client" Version="1.3.0"/>
+        <PackageReference Include="AElf.CSharp.Core" Version="1.10.0"/>
+        <PackageReference Include="AElf.Tools" Version="1.0.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Google.Protobuf" Version="3.29.2"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1"/>
+        <PackageReference Include="Microsoft.Orleans.Runtime" Version="7.2.6"/>
+        <PackageReference Include="Microsoft.Orleans.Sdk" Version="7.2.6"/>
+        <PackageReference Include="AElf.OpenTelemetry" Version="1.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\ZkVoteRelayer.Domain.Shared\ZkVoteRelayer.Domain.Shared.csproj" />
+        <ProjectReference Include="..\ZkVoteRelayer.Application.Contracts\ZkVoteRelayer.Application.Contracts.csproj"/>
+        <ProjectReference Include="..\ZkVoteRelayer.Domain.Shared\ZkVoteRelayer.Domain.Shared.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="obj/Debug/net8.0/Protobuf/**/*.cs"/>
     </ItemGroup>
 </Project>

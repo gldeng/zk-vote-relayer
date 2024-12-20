@@ -12,6 +12,7 @@ namespace ZkVoteRelayer.Silo;
 [DependsOn(
     typeof(AbpAspNetCoreSerilogModule),
     typeof(AbpAutofacModule),
+    typeof(DomainGrainsModule),
     typeof(OpenTelemetryModule)
 )]
 public class SiloModule : AbpModule, IDomainGrainsModule, IApplicationGrainsModule
