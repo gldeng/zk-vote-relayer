@@ -29,7 +29,7 @@ public class RelayerController : ZkVoteRelayerController
         return await _txRelayAppService.GetSupportedCallsAsync();
     }
 
-    [HttpPost("relayTx")]
+    [HttpPost("relayVoteTx")]
     public async Task<AElf.Client.Dto.TransactionResultDto> RelayTransaction(TxDto tx)
     {
         return await _txRelayAppService.SubmitTransactionAsync(tx);
