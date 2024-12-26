@@ -176,8 +176,7 @@ public class ZkVoteRelayerHttpApiHostModule : AbpModule, IDomainGrainsModule, IA
                     .WithAbpExposedHeaders()
                     .SetIsOriginAllowedToAllowWildcardSubdomains()
                     .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
+                    .AllowAnyMethod();
             });
         });
     }
